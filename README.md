@@ -36,6 +36,7 @@ SOME_RANDOM_SECRET_STRING=lQwm5L53OEi4wM
 
 ## Usage
 
+```
 Usage: pommel [options] [command]
 
 Options:
@@ -50,3 +51,4 @@ Commands:
   del|delete <profile> [key]          Delete environment variable <key>
   dump <profile>                      dump the profile environment
   help [command]                      display help for command
+```
