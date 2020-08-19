@@ -12,14 +12,16 @@ Inspired by [aws-vault](https://github.com/99designs/aws-vault)
 
 ## Installing
 
-```yarn global add pommel```
+```
+yarn global add pommel
+```
 
 ## Quick start
 
 Add a secret value to the profile called `development`
 
 ```
-$ pommel add development SOME_RANDOM_SECRET_STRING lQwm5L53OEi4wM 
+$ pommel add development SOME_RANDOM_SECRET_STRING lQwm5L53OEi4wM
 ```
 
 Execute the command `env` in the profile called `development`
@@ -32,7 +34,6 @@ DISPLAY=:0
 ...
 SOME_RANDOM_SECRET_STRING=lQwm5L53OEi4wM
 ```
-
 
 ## Usage
 
