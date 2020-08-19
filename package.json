@@ -4,22 +4,21 @@
   "private": false,
   "license": "UNLICENSED",
   "types": "dist/index.d.ts",
-  "files": [
-    "dist/cli.js"
-  ],
   "bin": {
     "pommel": "dist/cli.js"
   },
+  "files": [
+    "dist/cli.js"
+  ],
   "scripts": {
     "build": "tsc",
-    "build:watch": "tsc -w",
     "build:clean": "rimraf dist/**",
+    "build:watch": "tsc -w",
     "bundle:watch": "yarn bundle -w",
     "prepare": "yarn build:clean && yarn build",
     "test": "jest"
   },
   "dependencies": {
-    "@types/inquirer": "^7.3.0",
     "commander": "^6.0.0",
     "inquirer": "^7.3.3",
     "keytar": "^6.0.1",
@@ -28,6 +27,7 @@
   "devDependencies": {
     "@block65/eslint-config": "^1.1.4",
     "@types/commander": "^2.12.2",
+    "@types/inquirer": "^7.3.0",
     "@types/jest": "^26.0.10",
     "@types/node": "^14.6.0",
     "@typescript-eslint/eslint-plugin": "^3.9.1",
