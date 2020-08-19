@@ -19,7 +19,7 @@ function validateEnvironmentVariableKey(input: unknown): boolean {
   return String(input).match(/\w+/) !== null;
 }
 
-async function assetEnvVarKeyNotExists(
+async function assertEnvVarKeyNotExists(
   credentialsServiceName: string,
   key: string,
 ) {
@@ -29,7 +29,7 @@ async function assetEnvVarKeyNotExists(
   }
 }
 
-async function assetEnvVarKeyExists(
+async function assertEnvVarKeyExists(
   credentialsServiceName: string,
   key: string,
 ) {
@@ -74,7 +74,7 @@ program
   .action((profile, key, value) => {
     const executeSet = async (resolvedKey: string, val: string) => {
       const credentialsServiceName = getCredentialsServiceName(profile);
-      await assetEnvVarKeyNotExists(credentialsServiceName, resolvedKey);
+      await assertEnvVarKeyNotExists(credentialsServiceName, resolvedKey);
       await keytar.setPassword(credentialsServiceName, resolvedKey, val);
     };
 
@@ -119,7 +119,7 @@ program
   .action((profile, key) => {
     const executeDelete = async (resolvedKey: string) => {
       const credentialsServiceName = getCredentialsServiceName(profile);
-      await assetEnvVarKeyExists(credentialsServiceName, resolvedKey);
+      await assertEnvVarKeyExists(credentialsServiceName, resolvedKey);
       await keytar.deletePassword(credentialsServiceName, resolvedKey);
     };
 
