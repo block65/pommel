@@ -1,6 +1,6 @@
 {
   "name": "@block65/pommel",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "private": false,
   "license": "UNLICENSED",
   "types": "dist/index.d.ts",
