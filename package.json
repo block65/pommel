@@ -1,6 +1,6 @@
 {
   "name": "@block65/pommel",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "private": false,
   "description": "Store and access sensitive environment variables using your operating system's secure keystore.",
   "keywords": [
@@ -32,7 +32,8 @@
     "build:watch": "tsc -w",
     "bundle:watch": "yarn bundle -w",
     "prepare": "yarn build:clean && yarn build",
-    "test": "jest"
+    "test": "jest",
+    "release": "standard-version"
   },
   "dependencies": {
     "commander": "^6.0.0",
