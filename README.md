@@ -12,7 +12,7 @@ Inspired by [aws-vault](https://github.com/99designs/aws-vault)
 
 ## Installing
 
-```
+```shell script
 yarn global add pommel
 ```
 
@@ -20,19 +20,26 @@ yarn global add pommel
 
 Add a secret value to the profile called `development`
 
-```
-$ pommel add development SOME_RANDOM_SECRET_STRING lQwm5L53OEi4wM
+```shell script
+$ pommel add development SOME_SECRET_ENV_VAR lQwm5L53OEi4wM
 ```
 
 Execute the command `env` in the profile called `development`
 
-```
+```shell script
 $ pommel exec development -- /usr/bin/env
 TERM=xterm
 USER=user
 DISPLAY=:0
 ...
-SOME_RANDOM_SECRET_STRING=lQwm5L53OEi4wM
+SOME_SECRET_ENV_VAR=lQwm5L53OEi4wM
+```
+
+Chain a command execution of `terraform apply` with pommel profile called
+`development` and aws-vault profile `production`
+
+```shell script
+$ pommel exec development -- aws-vault exec production -- terraform apply
 ```
 
 ## Usage
