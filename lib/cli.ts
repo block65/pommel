@@ -2,7 +2,7 @@
 import { Command } from 'commander';
 import * as keytar from 'keytar';
 import * as inquirer from 'inquirer';
-import { sync as readPkgSync } from 'read-pkg';
+import { sync as readPkgUpSync } from 'read-pkg-up';
 import { spawn } from 'child_process';
 import { userInfo } from 'os';
 
@@ -39,14 +39,19 @@ async function assertEnvVarKeyExists(
   }
 }
 
-const { bin, version } = readPkgSync();
-const [[name]] = Object.entries(bin as Record<string, string>);
+const pkg = readPkgUpSync({ cwd: __dirname });
+
+if (!pkg?.packageJson.bin || !pkg.packageJson.version) {
+  throw new Error('Missing or invalid package.json');
+}
+
+const [[name]] = Object.entries(pkg.packageJson.bin as Record<string, string>);
 const keyPrefix = `${userInfo().username}@${name}`;
 const getCredentialsServiceName = (profile: string) =>
   `${keyPrefix}/${profile}`;
 const program = new Command(name);
 
-program.version(version);
+program.version(pkg.packageJson.version);
 
 program
   .command('exec <profile> -- <command> [args...]')
