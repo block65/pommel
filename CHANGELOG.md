@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.0.3](https://github.com/block65/pommel/compare/v2.0.2...v2.0.3) (2020-08-20)
+
+### Bug Fixes
+
+- fix determination of package name and version ([#2](https://github.com/block65/pommel/issues/2)) ([ac906bf](https://github.com/block65/pommel/commit/ac906bf78b15339e7f71e2f7502f7314fb072990))
+
 ### 2.0.2 (2020-08-20)
 
 ### Features
