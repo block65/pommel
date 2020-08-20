@@ -4,13 +4,13 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### 2.0.2 (2020-08-20)
 
+### Features
+
+- public release
+
 ### Bug Fixes
 
 - remove old jest-extended ref ([d887ea9](https://github.com/block65/pommel/commit/d887ea97578c86698f3f302a2d132239eb9c9424))
-
-### [2.0.2](https://github.com/block65/pommel/compare/v2.0.1...v2.0.2) (2020-08-20)
-
-- public release
 
 ### [2.0.1](https://github.com/block65/pommel/compare/v0.0.1...v2.0.1) (2020-08-19)
 
