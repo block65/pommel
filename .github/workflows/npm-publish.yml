@@ -26,7 +26,7 @@ jobs:
         with:
           node-version: 12
           registry-url: https://registry.npmjs.org/
-      - run: yarn install --production=true --non-interactive --frozen-lockfile
+      - run: yarn install --production=false --non-interactive --frozen-lockfile
       - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.npm_token}}
@@ -40,7 +40,7 @@ jobs:
         with:
           node-version: 12
           registry-url: https://npm.pkg.github.com/
-      - run: yarn install --production=true --non-interactive --frozen-lockfile
+      - run: yarn install --production=false --non-interactive --frozen-lockfile
       - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
