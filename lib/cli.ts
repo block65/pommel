@@ -71,10 +71,9 @@ program
   });
 
 program
-  .command('add <profile> [key] [value]')
-  .alias('set')
+  .command('set <profile> [key] [value]')
   .description(
-    'Add environment variable [key] with value [value] to the profile',
+    'Set environment variable [key] with value [value] to the profile',
   )
   .action((profile, key, value) => {
     const executeSet = async (resolvedKey: string, val: string) => {
@@ -117,7 +116,6 @@ program
 
 program
   .command('unset <profile> [key]')
-  .alias('unset')
   .description('Unset environment variable <key>')
   .action((profile, key) => {
     const executeUnset = async (resolvedKey: string) => {
