@@ -12,7 +12,7 @@ interface TtyError extends Error {
 
 function errorHandler(err: TtyError | Error) {
   process.stderr.write(`${err.message}\n`);
-  process.exit(1);
+  process.exitCode = 1;
 }
 
 function validateEnvironmentVariableKey(input: unknown): boolean {
@@ -128,7 +128,9 @@ program
 
     if (key && validateEnvironmentVariableKey(key)) {
       return executeUnset(key)
-        .then(() => process.stdout.write(`${key} unset\n`))
+        .then(() => {
+          process.stdout.write(`${key} unset\n`);
+        })
         .catch(errorHandler);
     }
 
