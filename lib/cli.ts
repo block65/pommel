@@ -116,20 +116,20 @@ program
   });
 
 program
-  .command('del <profile> [key]')
-  .alias('delete')
-  .alias('remove')
-  .alias('erase')
-  .description('Delete environment variable <key>')
+  .command('unset <profile> [key]')
+  .alias('unset')
+  .description('Unset environment variable <key>')
   .action((profile, key) => {
-    const executeDelete = async (resolvedKey: string) => {
+    const executeUnset = async (resolvedKey: string) => {
       const credentialsServiceName = getCredentialsServiceName(profile);
       await assertEnvVarKeyExists(credentialsServiceName, resolvedKey);
       await keytar.deletePassword(credentialsServiceName, resolvedKey);
     };
 
     if (key && validateEnvironmentVariableKey(key)) {
-      return executeDelete(key).catch(errorHandler);
+      return executeUnset(key)
+        .then(() => process.stdout.write(`${key} unset\n`))
+        .catch(errorHandler);
     }
 
     return inquirer
@@ -141,7 +141,7 @@ program
           validate: validateEnvironmentVariableKey,
         },
       ])
-      .then(async (answers) => executeDelete(answers.key))
+      .then(async (answers) => executeUnset(answers.key))
       .catch(errorHandler);
   });
 
