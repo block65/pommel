@@ -13,7 +13,7 @@ Inspired by [aws-vault](https://github.com/99designs/aws-vault)
 ## Installing
 
 ```shell script
-yarn global add pommel
+yarn global add @block65/pommel
 ```
 
 ## Quick start
