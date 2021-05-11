@@ -33,7 +33,6 @@
     "build:watch": "tsc -w",
     "prepare": "husky install",
     "release": "standard-version",
-    "postinstall": "yarn build:clean && yarn build",
     "test": "jest"
   },
   "dependencies": {
