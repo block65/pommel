@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
-import * as keytar from 'keytar';
-import * as inquirer from 'inquirer';
-import { sync as readPkgUpSync } from 'read-pkg-up';
+import keytar from 'keytar';
+import inquirer from 'inquirer';
+import { readPackageUpSync } from 'read-pkg-up';
 import { spawn } from 'child_process';
 import { userInfo } from 'os';
 
@@ -39,7 +39,7 @@ async function assertEnvVarKeyExists(
   }
 }
 
-const pkg = readPkgUpSync({ cwd: __dirname });
+const pkg = readPackageUpSync({ cwd: import.meta.url });
 
 if (!pkg?.packageJson.bin || !pkg.packageJson.version) {
   throw new Error('Missing or invalid package.json');
