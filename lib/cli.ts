@@ -5,6 +5,7 @@ import inquirer from 'inquirer';
 import { readPackageUpSync } from 'read-pkg-up';
 import { spawn } from 'child_process';
 import { userInfo } from 'os';
+import { fileURLToPath } from 'url';
 
 interface TtyError extends Error {
   isTtyError: boolean;
@@ -39,7 +40,7 @@ async function assertEnvVarKeyExists(
   }
 }
 
-const pkg = readPackageUpSync({ cwd: import.meta.url });
+const pkg = readPackageUpSync({ cwd: fileURLToPath(import.meta.url) });
 
 if (!pkg?.packageJson.bin || !pkg.packageJson.version) {
   throw new Error('Missing or invalid package.json');
