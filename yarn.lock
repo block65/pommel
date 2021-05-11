@@ -294,14 +294,14 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@block65/eslint-config@4.0.0":
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/@block65/eslint-config/-/eslint-config-4.0.0.tgz#75a678e892b7fab87ec56e48a483a927da4e08eb"
-  integrity sha512-lkH0qyYaDh3rrvfrEyEyDPS48wHHshcmbKUJm4QtlHSMJqRI2kXbLyeaRv/GFzHslpF+JBYxEJzWMUNWz/y5Dg==
+"@block65/eslint-config@4.1.1":
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/@block65/eslint-config/-/eslint-config-4.1.1.tgz#a79c601a0597f95081809070468307e22c5af2f1"
+  integrity sha512-odyZ1f4rJ58V3iA+g6e3DG2LyHG9KTjvay6aQY10vnxQTpMY2ZkCBQBOLfoE+YMJdjD+KVoJfAJBIWujulZXnA==
   dependencies:
     eslint-config-airbnb-base "^14.2.1"
     eslint-config-airbnb-typescript "^12.3.1"
-    eslint-config-prettier "^8.1.0"
+    eslint-config-prettier "^8.3.0"
     eslint-import-resolver-node "^0.3.4"
 
 "@cnakazawa/watch@^1.0.3":
@@ -2168,7 +2168,7 @@ eslint-config-airbnb@^18.2.0:
     object.assign "^4.1.2"
     object.entries "^1.1.2"
 
-eslint-config-prettier@^8.1.0:
+eslint-config-prettier@^8.3.0:
   version "8.3.0"
   resolved "https://registry.yarnpkg.com/eslint-config-prettier/-/eslint-config-prettier-8.3.0.tgz#f7471b20b6fe8a9a9254cc684454202886a2dd7a"
   integrity sha512-BgZuLUSeKzvlL/VUjx/Yb787VQ26RU3gGjA3iiFvdsp/2bMfVIWUVP7tjxtjS0e+HP409cPlPvNkQloz8C91ew==
