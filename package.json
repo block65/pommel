@@ -1,6 +1,6 @@
 {
   "name": "@block65/pommel",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "private": false,
   "description": "Store and access sensitive environment variables using your operating system's secure keystore.",
   "keywords": [
@@ -31,7 +31,6 @@
     "build": "tsc",
     "build:clean": "rimraf dist/**",
     "build:watch": "tsc -w",
-    "bundle:watch": "yarn bundle -w",
     "prepare": "husky install",
     "release": "standard-version",
     "postinstall": "yarn build:clean && yarn build",
@@ -44,7 +43,7 @@
     "read-pkg-up": "^8.0.0"
   },
   "devDependencies": {
-    "@block65/eslint-config": "4.0.0",
+    "@block65/eslint-config": "4.1.1",
     "@commitlint/cli": "^12.1.1",
     "@commitlint/config-conventional": "^12.1.1",
     "@types/inquirer": "^7.3.1",
