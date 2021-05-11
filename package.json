@@ -31,7 +31,6 @@
     "build": "tsc",
     "build:clean": "rimraf dist/**",
     "build:watch": "tsc -w",
-    "bundle:watch": "yarn bundle -w",
     "prepare": "husky install",
     "release": "standard-version",
     "postinstall": "yarn build:clean && yarn build",
