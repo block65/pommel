@@ -1,6 +1,6 @@
 {
   "name": "@block65/pommel",
-  "version": "3.0.8",
+  "version": "3.0.9",
   "private": false,
   "description": "Store and access sensitive environment variables using your operating system's secure keystore.",
   "keywords": [
