@@ -1,73 +1,95 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
-import keytar from 'keytar';
+import dotenv from 'dotenv';
 import inquirer from 'inquirer';
-import { readPackageUpSync } from 'read-pkg-up';
-import { spawn } from 'child_process';
-import { userInfo } from 'os';
-import { fileURLToPath } from 'url';
+import keytar from 'keytar';
+import { spawn } from 'node:child_process';
+import { userInfo } from 'node:os';
+import { ReadStream } from 'node:tty';
+import { fileURLToPath } from 'node:url';
+import { readPackageUp } from 'read-pkg-up';
 
 interface TtyError extends Error {
   isTtyError: boolean;
 }
 
+function stdout(str: string) {
+  process.stdout.write(`${str}\n`);
+}
+
+function stderr(str: string) {
+  process.stderr.write(`${str}\n`);
+}
+
+async function streamToString(stream: ReadStream): Promise<string> {
+  if (stream.isTTY) {
+    return '';
+  }
+
+  const chunks = [];
+  for await (const chunk of stream) {
+    chunks.push(chunk);
+  }
+  return Buffer.concat(chunks).toString('utf8');
+}
+
 function errorHandler(err: TtyError | Error) {
-  process.stderr.write(`${err.message}\n`);
+  stderr(err.message);
   process.exitCode = 1;
 }
 
-function validateEnvironmentVariableKey(input: unknown): boolean {
+function environmentVariableKeyIsValid(input: unknown): input is string {
   return String(input).match(/\w+/) !== null;
 }
 
-async function assertEnvVarKeyNotExists(
+async function assertEnvVarKeysNotExist(
   credentialsServiceName: string,
-  key: string,
+  keys: string[],
 ) {
-  const existing = await keytar.getPassword(credentialsServiceName, key);
-  if (existing) {
-    throw new Error(`Key "${key}" exists`);
+  for await (const key of keys) {
+    const existing = await keytar.getPassword(credentialsServiceName, key);
+    if (existing) {
+      throw new Error(`Key "${key}" exists`);
+    }
   }
 }
 
-async function assertEnvVarKeyExists(
-  credentialsServiceName: string,
-  key: string,
-) {
-  const existing = await keytar.getPassword(credentialsServiceName, key);
-  if (!existing) {
-    throw new Error(`Key "${key}" does not exist`);
-  }
+function getCredentialsServiceName(packageName: string, profile: string) {
+  const keyPrefix = `${userInfo().username}@${packageName}`;
+  return `${keyPrefix}/${profile}`;
 }
 
-const pkg = readPackageUpSync({ cwd: fileURLToPath(import.meta.url) });
+const pkg = await readPackageUp({ cwd: fileURLToPath(import.meta.url) });
 
 if (!pkg?.packageJson.bin || !pkg.packageJson.version) {
   throw new Error('Missing or invalid package.json');
 }
 
-const [[name]] = Object.entries(pkg.packageJson.bin as Record<string, string>);
-const keyPrefix = `${userInfo().username}@${name}`;
-const getCredentialsServiceName = (profile: string) =>
-  `${keyPrefix}/${profile}`;
-const program = new Command(name);
+const [[packageName]] = Object.entries(
+  pkg.packageJson.bin as Record<string, string>,
+);
+
+const program = new Command(packageName);
 
 program.version(pkg.packageJson.version);
+program.showSuggestionAfterError();
 
 program
   .command('exec <profile> -- <command> [args...]')
   .description('execute a specific command within the profile environment')
-  .action((profile, command, args) => {
-    const credentialsServiceName = getCredentialsServiceName(profile);
-    keytar.findCredentials(credentialsServiceName).then((creds) => {
-      const env = Object.fromEntries(
-        creds.map(({ account, password }) => [account, password]),
-      );
+  .action(async (profile, command, args) => {
+    const credentialsServiceName = getCredentialsServiceName(
+      packageName,
+      profile,
+    );
+    const creds = await keytar.findCredentials(credentialsServiceName);
+    const env = Object.fromEntries(
+      creds.map(({ account, password }) => [account, password]),
+    );
 
-      spawn(command, args, {
-        env: { ...process.env, ...env },
-        stdio: 'inherit',
-      });
+    spawn(command, args, {
+      env: { ...process.env, ...env },
+      stdio: 'inherit',
     });
   });
 
@@ -76,30 +98,32 @@ program
   .description(
     'Set environment variable [key] with value [value] to the profile',
   )
-  .action((profile, key, value) => {
-    const executeSet = async (resolvedKey: string, val: string) => {
-      const credentialsServiceName = getCredentialsServiceName(profile);
-      await assertEnvVarKeyNotExists(credentialsServiceName, resolvedKey);
-      await keytar.setPassword(credentialsServiceName, resolvedKey, val);
-    };
+  .action(async (profile, key, value) => {
+    const credentialsServiceName = getCredentialsServiceName(
+      packageName,
+      profile,
+    );
 
     if (
       typeof key !== 'undefined' &&
       typeof value !== 'undefined' &&
-      validateEnvironmentVariableKey(key) &&
+      environmentVariableKeyIsValid(key) &&
       value.length > 0
     ) {
-      return executeSet(key, value).catch(errorHandler);
+      await assertEnvVarKeysNotExist(credentialsServiceName, [key]);
+      return keytar
+        .setPassword(credentialsServiceName, key, value)
+        .catch(errorHandler);
     }
 
-    return inquirer
+    await inquirer
       .prompt([
         {
           type: 'string',
           message: 'Enter the environment variable key:',
           name: 'key',
           default: key,
-          validate: validateEnvironmentVariableKey,
+          validate: environmentVariableKeyIsValid,
         },
         {
           type: 'string',
@@ -109,53 +133,92 @@ program
           validate: (val: unknown) => String(val).length > 0,
         },
       ])
-      .then(async (answers: { key: string; value: string }) =>
-        executeSet(answers.key, answers.value),
-      )
+      .then(async (answers: { key: string; value: string }) => {
+        await assertEnvVarKeysNotExist(credentialsServiceName, [answers.key]);
+        await keytar
+          .setPassword(credentialsServiceName, answers.key, answers.value)
+          .catch(errorHandler);
+      })
       .catch(errorHandler);
   });
 
 program
   .command('unset <profile> [key]')
   .description('Unset environment variable <key>')
-  .action((profile, key) => {
+  .action(async (profile, key) => {
     const executeUnset = async (resolvedKey: string) => {
-      const credentialsServiceName = getCredentialsServiceName(profile);
-      await assertEnvVarKeyExists(credentialsServiceName, resolvedKey);
+      const credentialsServiceName = getCredentialsServiceName(
+        packageName,
+        profile,
+      );
       await keytar.deletePassword(credentialsServiceName, resolvedKey);
     };
 
-    if (key && validateEnvironmentVariableKey(key)) {
+    if (key && environmentVariableKeyIsValid(key)) {
       return executeUnset(key)
         .then(() => {
-          process.stdout.write(`${key} unset\n`);
+          stdout(`${key} unset`);
         })
         .catch(errorHandler);
     }
 
-    return inquirer
+    await inquirer
       .prompt([
         !key && {
           type: 'string',
           message: 'Enter the environment variable key',
           name: 'key',
-          validate: validateEnvironmentVariableKey,
+          validate: environmentVariableKeyIsValid,
         },
       ])
-      .then(async (answers) => executeUnset(answers.key))
+      .then((answers) => executeUnset(answers.key))
       .catch(errorHandler);
   });
 
 program
   .command('dump <profile>')
   .description('dump the profile environment')
-  .action((profile) => {
-    const credentialsServiceName = getCredentialsServiceName(profile);
-    keytar.findCredentials(credentialsServiceName).then((creds) => {
-      creds.forEach(({ account, password }) =>
-        process.stdout.write(`${account}=${password}\n`),
-      );
-    });
+  .action(async (profile) => {
+    const credentialsServiceName = getCredentialsServiceName(
+      packageName,
+      profile,
+    );
+    const creds = await keytar.findCredentials(credentialsServiceName);
+
+    creds.forEach(({ account: key, password: value }) =>
+      stdout(`${key}=${value}`),
+    );
+  });
+
+program
+  .command('slurp <profile>')
+  .description('slurp environment variables from STDIN into the keystore')
+  .action(async (profile) => {
+    const credentialsServiceName = getCredentialsServiceName(
+      packageName,
+      profile,
+    );
+
+    const input = await streamToString(process.stdin);
+
+    if (!input) {
+      program.error('stdin was empty', {
+        exitCode: 1,
+      });
+    }
+
+    const vars = dotenv.parse(input);
+
+    for await (const key of Object.keys(vars)) {
+      await assertEnvVarKeysNotExist(credentialsServiceName, [key]);
+    }
+
+    for await (const [key, value] of Object.entries(vars)) {
+      keytar
+        .setPassword(credentialsServiceName, key, value)
+        .catch(errorHandler);
+      stdout(`${key} set`);
+    }
   });
 
 program.parse(process.argv);
