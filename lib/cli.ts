@@ -192,7 +192,7 @@ program
 
 program
   .command('slurp <profile>')
-  .description('slurp environment variables from STDIN into the keystore')
+  .description('slurp environment variables from STDIN')
   .action(async (profile) => {
     const credentialsServiceName = getCredentialsServiceName(
       packageName,
