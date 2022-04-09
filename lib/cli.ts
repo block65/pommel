@@ -27,6 +27,7 @@ async function streamToString(stream: ReadStream): Promise<string> {
   }
 
   const chunks = [];
+  // eslint-disable-next-line no-restricted-syntax
   for await (const chunk of stream) {
     chunks.push(chunk);
   }
@@ -46,6 +47,7 @@ async function assertEnvVarKeysNotExist(
   credentialsServiceName: string,
   keys: string[],
 ) {
+  // eslint-disable-next-line no-restricted-syntax
   for await (const key of keys) {
     const existing = await keytar.getPassword(credentialsServiceName, key);
     if (existing) {
@@ -75,7 +77,7 @@ program.version(pkg.packageJson.version);
 program.showSuggestionAfterError();
 
 program
-  .command('exec <profile> -- <command> [args...]')
+  .command('exec <profile> <command> [args...]')
   .description('execute a specific command within the profile environment')
   .action(async (profile, command, args) => {
     const credentialsServiceName = getCredentialsServiceName(
@@ -111,7 +113,7 @@ program
       value.length > 0
     ) {
       await assertEnvVarKeysNotExist(credentialsServiceName, [key]);
-      return keytar
+      await keytar
         .setPassword(credentialsServiceName, key, value)
         .catch(errorHandler);
     }
@@ -155,7 +157,7 @@ program
     };
 
     if (key && environmentVariableKeyIsValid(key)) {
-      return executeUnset(key)
+      await executeUnset(key)
         .then(() => {
           stdout(`${key} unset`);
         })
@@ -209,10 +211,12 @@ program
 
     const vars = dotenv.parse(input);
 
+    // eslint-disable-next-line no-restricted-syntax
     for await (const key of Object.keys(vars)) {
       await assertEnvVarKeysNotExist(credentialsServiceName, [key]);
     }
 
+    // eslint-disable-next-line no-restricted-syntax
     for await (const [key, value] of Object.entries(vars)) {
       keytar
         .setPassword(credentialsServiceName, key, value)
