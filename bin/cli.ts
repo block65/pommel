@@ -1,12 +1,12 @@
 #!/usr/bin/env node
-import { Command } from 'commander';
-import dotenv from 'dotenv';
-import inquirer from 'inquirer';
-import keytar from 'keytar';
 import { spawn } from 'node:child_process';
 import { userInfo } from 'node:os';
 import { ReadStream } from 'node:tty';
 import { fileURLToPath } from 'node:url';
+import { Command } from 'commander';
+import dotenv from 'dotenv';
+import inquirer from 'inquirer';
+import keytar from 'keytar';
 import { readPackageUp } from 'read-pkg-up';
 
 interface TtyError extends Error {

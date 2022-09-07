@@ -1,12 +1,11 @@
-name: Deploy
+name: Unit Tests (PR)
 
 on:
-  workflow_dispatch: {}
-  release:
-    types: [published]
+  pull_request:
+    branches: ['master']
 
 jobs:
-  publish-npm:
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -14,7 +13,4 @@ jobs:
         with:
           node-version: 18
           registry-url: https://registry.npmjs.org/
-      - run: make
-      - run: npm publish --access=public
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.npm_token}}
+      - run: make test

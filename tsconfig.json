@@ -2,20 +2,14 @@
   "compilerOptions": {
     "sourceMap": true,
     "strict": true,
-    "target": "es2021",
+    "target": "es2022",
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "node16",
     "outDir": "./dist",
     "removeComments": true,
-    "lib": [
-      "es2021"
-    ],
+    "lib": ["es2022"],
     "allowSyntheticDefaultImports": true
   },
-  "include": [
-    "./lib"
-  ],
-  "exclude": [
-    "./dist"
-  ]
+  "include": ["bin", "./__tests__"],
+  "exclude": ["./dist"]
 }
