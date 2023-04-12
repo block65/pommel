@@ -2,6 +2,7 @@
   "compilerOptions": {
     "sourceMap": true,
     "strict": true,
+    "composite": true,
     "target": "es2022",
     "module": "esnext",
     "moduleResolution": "node16",
@@ -10,6 +11,7 @@
     "lib": ["es2022"],
     "allowSyntheticDefaultImports": true
   },
-  "include": ["bin", "./__tests__"],
-  "exclude": ["./dist"]
+  "include": ["bin"],
+  "exclude": ["./dist"],
+  "references": [{ "path": "./__tests__" }]
 }
