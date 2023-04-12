@@ -39,10 +39,10 @@
   },
   "dependencies": {
     "commander": "^9.4.0",
-    "dotenv": "^16.0.2",
-    "inquirer": "^9.1.1",
+    "dotenv": "^16.0.3",
+    "inquirer": "^9.1.5",
     "keytar": "^7.9.0",
-    "read-pkg-up": "^9.1.0"
+    "read-pkg-up": "^9.1.0",
   },
   "devDependencies": {
     "@babel/core": "^7.21.4",
