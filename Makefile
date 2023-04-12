@@ -22,3 +22,8 @@ dist: node_modules tsconfig.json $(SRCS)
 .PHONY: dev
 dev:
 	pnpm tsc -w
+
+.PHONY: pretty
+pretty: node_modules
+	pnpm eslint --fix . || true
+	pnpm prettier --write .
