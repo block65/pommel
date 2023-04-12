@@ -77,23 +77,31 @@ const program = sade(packageName);
 program.version(pkg.packageJson.version);
 
 program
-  .command('exec <profile> <command> [args...]')
+  .command('exec <profile> <command>')
   .describe('execute a specific command within the profile environment')
-  .action(async (profile: string, command: string, args: string[] = []) => {
-    const credentialsServiceName = getCredentialsServiceName(
-      packageName,
-      profile,
-    );
-    const creds = await keytar.findCredentials(credentialsServiceName);
-    const env = Object.fromEntries(
-      creds.map(({ account, password }) => [account, password]),
-    );
+  .action(
+    async (
+      profile: string,
+      command: string,
+      variadic: {
+        _: string[];
+      },
+    ) => {
+      const credentialsServiceName = getCredentialsServiceName(
+        packageName,
+        profile,
+      );
+      const creds = await keytar.findCredentials(credentialsServiceName);
+      const env = Object.fromEntries(
+        creds.map(({ account, password }) => [account, password]),
+      );
 
-    spawn(command, args, {
-      env: { ...process.env, ...env },
-      stdio: 'inherit',
-    });
-  });
+      spawn(command, variadic._, {
+        env: { ...process.env, ...env },
+        stdio: 'inherit',
+      });
+    },
+  );
 
 program
   .command('set <profile> [key] [value]')
