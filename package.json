@@ -38,11 +38,12 @@
     "test": "jest"
   },
   "dependencies": {
-    "commander": "^9.4.0",
+    "colorette": "^2.0.19",
     "dotenv": "^16.0.3",
     "inquirer": "^9.1.5",
     "keytar": "^7.9.0",
     "read-pkg-up": "^9.1.0",
+    "sade": "^1.8.1"
   },
   "devDependencies": {
     "@babel/core": "^7.21.4",

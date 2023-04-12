@@ -3,11 +3,12 @@ import { spawn } from 'node:child_process';
 import { userInfo } from 'node:os';
 import { ReadStream } from 'node:tty';
 import { fileURLToPath } from 'node:url';
-import { Command } from 'commander';
+import { green, red, bold, blue } from 'colorette';
 import dotenv from 'dotenv';
 import inquirer from 'inquirer';
 import keytar from 'keytar';
 import { readPackageUp } from 'read-pkg-up';
+import sade from 'sade';
 
 interface TtyError extends Error {
   isTtyError: boolean;
@@ -35,12 +36,12 @@ async function streamToString(stream: ReadStream): Promise<string> {
 }
 
 function errorHandler(err: TtyError | Error) {
-  stderr(err.message);
+  stderr(`${bold(red(err.name))} ${err.message}`);
   process.exitCode = 1;
 }
 
 function environmentVariableKeyIsValid(input: unknown): input is string {
-  return String(input).match(/\w+/) !== null;
+  return String(input).match(/^\w+$/) !== null;
 }
 
 async function assertEnvVarKeysNotExist(
@@ -51,7 +52,7 @@ async function assertEnvVarKeysNotExist(
   for await (const key of keys) {
     const existing = await keytar.getPassword(credentialsServiceName, key);
     if (existing) {
-      throw new Error(`Key "${key}" exists`);
+      throw new Error(`${key} exists`);
     }
   }
 }
@@ -71,15 +72,14 @@ const [[packageName]] = Object.entries(
   pkg.packageJson.bin as Record<string, string>,
 );
 
-const program = new Command(packageName);
+const program = sade(packageName);
 
 program.version(pkg.packageJson.version);
-program.showSuggestionAfterError();
 
 program
   .command('exec <profile> <command> [args...]')
-  .description('execute a specific command within the profile environment')
-  .action(async (profile, command, args) => {
+  .describe('execute a specific command within the profile environment')
+  .action(async (profile: string, command: string, args: string[] = []) => {
     const credentialsServiceName = getCredentialsServiceName(
       packageName,
       profile,
@@ -97,90 +97,93 @@ program
 
 program
   .command('set <profile> [key] [value]')
-  .description(
-    'Set environment variable [key] with value [value] to the profile',
-  )
-  .action(async (profile, key, value) => {
+  .describe('Set environment variable [key] with value [value] to the profile')
+  .action(async (profile: string, userKey?: string, userValue?: string) => {
     const credentialsServiceName = getCredentialsServiceName(
       packageName,
       profile,
     );
 
-    if (
-      typeof key !== 'undefined' &&
-      typeof value !== 'undefined' &&
-      environmentVariableKeyIsValid(key) &&
-      value.length > 0
-    ) {
-      await assertEnvVarKeysNotExist(credentialsServiceName, [key]);
-      await keytar
-        .setPassword(credentialsServiceName, key, value)
-        .catch(errorHandler);
-    }
+    const [key, value] =
+      !userValue && userKey?.match(/^\w+=.*/)
+        ? userKey.split('=')
+        : [userKey, userValue];
+
+    stdout(`${bold('profile')}: ${blue(profile)}`);
+    stdout(`${bold('command')}: ${blue('set')}`);
 
     await inquirer
-      .prompt([
-        {
-          type: 'string',
-          message: 'Enter the environment variable key:',
-          name: 'key',
-          default: key,
-          validate: environmentVariableKeyIsValid,
-        },
-        {
-          type: 'string',
-          message: 'Enter the value:',
-          name: 'value',
-          default: value,
-          validate: (val: unknown) => String(val).length > 0,
-        },
-      ])
+      .prompt(
+        [
+          {
+            message: 'Key:',
+            type: 'string',
+            name: 'key',
+            validate: environmentVariableKeyIsValid,
+          },
+          {
+            message: (answers) => `Value for ${answers.key}:`,
+            type: 'string',
+            name: 'value',
+            validate: (val: unknown) => String(val).length > 0,
+          },
+        ],
+        { key: environmentVariableKeyIsValid(key) ? key : undefined, value },
+      )
       .then(async (answers: { key: string; value: string }) => {
         await assertEnvVarKeysNotExist(credentialsServiceName, [answers.key]);
-        await keytar
-          .setPassword(credentialsServiceName, answers.key, answers.value)
-          .catch(errorHandler);
+        await keytar.setPassword(
+          credentialsServiceName,
+          answers.key,
+          answers.value,
+        );
+
+        stdout(`${green('OK')}`);
       })
       .catch(errorHandler);
   });
 
 program
   .command('unset <profile> [key]')
-  .description('Unset environment variable <key>')
-  .action(async (profile, key) => {
-    const executeUnset = async (resolvedKey: string) => {
-      const credentialsServiceName = getCredentialsServiceName(
-        packageName,
-        profile,
-      );
-      await keytar.deletePassword(credentialsServiceName, resolvedKey);
-    };
+  .describe('Unset environment variable <key>')
+  .action(async (profile: string, userKey?: string) => {
+    stdout(`${bold('profile')}: ${blue(profile)}`);
+    stdout(`${bold('command')}: ${blue('unset')}`);
 
-    if (key && environmentVariableKeyIsValid(key)) {
-      await executeUnset(key)
-        .then(() => {
-          stdout(`${key} unset`);
-        })
-        .catch(errorHandler);
-    }
+    const key = environmentVariableKeyIsValid(userKey) ? userKey : undefined;
 
     await inquirer
-      .prompt([
-        !key && {
-          type: 'string',
-          message: 'Enter the environment variable key',
-          name: 'key',
-          validate: environmentVariableKeyIsValid,
+      .prompt(
+        [
+          {
+            message: 'Key:',
+            type: 'string',
+            name: 'key',
+            default: key,
+            validate: environmentVariableKeyIsValid,
+            askAnswered: true,
+          },
+        ],
+        {
+          key,
         },
-      ])
-      .then((answers) => executeUnset(answers.key))
+      )
+      .then(async (answers) => {
+        const credentialsServiceName = getCredentialsServiceName(
+          packageName,
+          profile,
+        );
+        await keytar.deletePassword(credentialsServiceName, answers.key);
+
+        stdout(`${green('OK')}`);
+      })
       .catch(errorHandler);
   });
 
 program
   .command('dump <profile>')
-  .description('dump the profile environment')
-  .action(async (profile) => {
+  .describe('dump the profile environment')
+  .action(async (profile: string) => {
     const credentialsServiceName = getCredentialsServiceName(
       packageName,
       profile,
@@ -194,8 +197,8 @@ program
 
 program
   .command('slurp <profile>')
-  .description('slurp environment variables from STDIN')
-  .action(async (profile) => {
+  .describe('slurp environment variables from STDIN')
+  .action(async (profile: string) => {
     const credentialsServiceName = getCredentialsServiceName(
       packageName,
       profile,
@@ -204,9 +207,7 @@ program
     const input = await streamToString(process.stdin);
 
     if (!input) {
-      program.error('stdin was empty', {
-        exitCode: 1,
-      });
+      throw new Error('stdin was empty');
     }
 
     const vars = dotenv.parse(input);
